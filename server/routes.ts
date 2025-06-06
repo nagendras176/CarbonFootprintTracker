@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertSurveyTemplateSchema, insertSurveySchema, type SurveyQuestion } from "@shared/schema";
+import { authenticateUser, createUser } from "./auth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -12,6 +13,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
     return `${prefix}-${year}-${randomId}`;
   }
+
+  // Auth routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const result = await authenticateUser(req.body);
+      
+      if (!result) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input data", errors: error.errors });
+      }
+      console.error("Error during login:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const result = await createUser(req.body);
+      res.status(201).json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input data", errors: error.errors });
+      }
+      console.error("Error during signup:", error);
+      res.status(500).json({ message: "Signup failed" });
+    }
+  });
 
   // Calculate total carbon footprint from responses
   function calculateTotalCarbon(responses: Array<{ questionId: string; value: number; carbonEquivalent: number }>): number {
@@ -69,6 +102,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching survey template:", error);
       res.status(500).json({ message: "Failed to fetch survey template" });
+    }
+  });
+
+  app.get("/api/survey-templates", async (req, res) => {
+    try {
+      const templates = await storage.getAllSurveyTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching survey templates:", error);
+      res.status(500).json({ message: "Failed to fetch survey templates" });
     }
   });
 
@@ -149,8 +192,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Survey routes
   app.post("/api/surveys", async (req, res) => {
     try {
-      const surveyData = insertSurveySchema.parse(req.body);
-      const totalCarbon = calculateTotalCarbon(surveyData.responses);
+      const surveyData = insertSurveySchema.omit({ totalCarbonFootprint: true }).parse(req.body);
+      const totalCarbon = calculateTotalCarbon(surveyData.responses as Array<{ questionId: string; value: number; carbonEquivalent: number }>);
       
       const survey = await storage.createSurvey({
         ...surveyData,

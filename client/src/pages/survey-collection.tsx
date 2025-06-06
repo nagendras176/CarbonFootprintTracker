@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SurveyForm } from "@/components/survey/survey-form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { generatePDF } from "@/lib/pdf-generator";
-import { Search, QrCodeScanner, Description, Save, Eco } from "@mui/icons-material";
+import { Search, QrCodeScanner, Description, Save, Nature, List } from "@mui/icons-material";
 import type { SurveyTemplate, SurveyResponse } from "@shared/schema";
 
 interface HouseholdInfo {
@@ -17,6 +18,15 @@ interface HouseholdInfo {
   address: string;
   occupants: number;
   area: number;
+}
+
+interface Survey {
+  id: number;
+  templateId: number;
+  householdId: string;
+  householdAddress: string;
+  conductedAt: string;
+  template?: SurveyTemplate;
 }
 
 export default function SurveyCollection() {
@@ -27,6 +37,7 @@ export default function SurveyCollection() {
   const userId = 1;
 
   const [surveyCode, setSurveyCode] = useState("");
+  const [selectedSurveyId, setSelectedSurveyId] = useState<string>("");
   const [currentTemplate, setCurrentTemplate] = useState<SurveyTemplate | null>(null);
   const [householdInfo, setHouseholdInfo] = useState<HouseholdInfo>({
     id: "",
@@ -36,6 +47,15 @@ export default function SurveyCollection() {
   });
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
+
+  // Fetch user's surveys
+  const { data: userSurveys, isLoading: isLoadingSurveys } = useQuery({
+    queryKey: [`/api/survey-templates`, userId],
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/survey-templates`);
+      return response.json() as Promise<SurveyTemplate[]>;
+    },
+  });
 
   const totalCarbonFootprint = responses.reduce((total, response) => total + response.carbonEquivalent, 0);
 
@@ -57,6 +77,41 @@ export default function SurveyCollection() {
       toast({
         title: "Template Not Found",
         description: error.message || "Survey template with this code was not found",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setIsLoadingTemplate(false);
+    },
+  });
+
+  const loadSurveyMutation = useMutation({
+    mutationFn: async (surveyId: number) => {
+      setIsLoadingTemplate(true);
+      const response = await apiRequest("GET", `/api/surveys/${surveyId}`);
+      return response.json();
+    },
+    onSuccess: (survey: any) => {
+      // Load the template associated with this survey
+      if (survey.template) {
+        setCurrentTemplate(survey.template);
+        setHouseholdInfo({
+          id: survey.householdId,
+          address: survey.householdAddress,
+          occupants: survey.occupants || 0,
+          area: parseFloat(survey.area) || 0,
+        });
+        setResponses(survey.responses || []);
+        toast({
+          title: "Survey Loaded",
+          description: `Survey from ${new Date(survey.conductedAt).toLocaleDateString()} loaded successfully`,
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Survey Not Found",
+        description: error.message || "Survey was not found",
         variant: "destructive",
       });
     },
@@ -106,6 +161,13 @@ export default function SurveyCollection() {
       return;
     }
     loadTemplateMutation.mutate(surveyCode.trim());
+  };
+
+  const handleSelectSurvey = (surveyCode: string) => {
+    setSelectedSurveyId(surveyCode);
+    if (surveyCode) {
+      loadTemplateMutation.mutate(surveyCode);
+    }
   };
 
   const handleResponsesChange = (newResponses: SurveyResponse[]) => {
@@ -181,7 +243,51 @@ export default function SurveyCollection() {
         <CardHeader>
           <CardTitle className="font-medium text-gray-900">Start Survey</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
+          {/* Survey Selection Dropdown */}
+          <div>
+            <Label htmlFor="surveySelect" className="text-sm font-medium text-gray-700">
+              Select from Existing Surveys
+            </Label>
+            <div className="flex space-x-2 mt-2">
+              <Select value={selectedSurveyId} onValueChange={handleSelectSurvey}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Choose a survey..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {isLoadingSurveys ? (
+                    <SelectItem value="loading" disabled>Loading surveys...</SelectItem>
+                  ) : userSurveys && userSurveys.length > 0 ? (
+                    userSurveys.map((survey) => (
+                      <SelectItem key={survey.code} value={survey.code} className="truncate">
+                        {survey.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-surveys" disabled>No surveys found</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <Button 
+                variant="outline"
+                disabled={!selectedSurveyId || isLoadingTemplate}
+                className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">Or</span>
+            </div>
+          </div>
+
+          {/* Manual Code Entry */}
           <div>
             <Label htmlFor="surveyCode" className="text-sm font-medium text-gray-700">
               Survey Template Code
@@ -291,7 +397,7 @@ export default function SurveyCollection() {
           <Card className="bg-gradient-to-r from-green-800 to-green-600 text-white shadow-material">
             <CardContent className="p-6">
               <div className="text-center space-y-2">
-                <Eco className="text-4xl opacity-80 mx-auto" />
+                <Nature className="text-4xl opacity-80 mx-auto" />
                 <h3 className="text-lg font-medium">Total Carbon Footprint</h3>
                 <p className="text-3xl font-bold">{totalCarbonFootprint.toFixed(1)} kg CO₂</p>
                 <p className="text-green-100 text-sm">Monthly equivalent</p>
@@ -328,8 +434,8 @@ export default function SurveyCollection() {
           <CardContent className="p-6 text-center">
             <div className="text-gray-500">
               <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">Enter a survey code to get started</p>
-              <p className="text-xs mt-1">Load a survey template to begin data collection</p>
+              <p className="text-sm">Select a survey from the dropdown or enter a survey code to get started</p>
+              <p className="text-xs mt-1">Load a survey or template to begin data collection</p>
             </div>
           </CardContent>
         </Card>

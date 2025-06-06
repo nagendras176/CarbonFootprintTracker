@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { Leaf, Quiz, Assignment, AddCircle, AssignmentAdd, Description, Share, Edit } from "@mui/icons-material";
+import { useAuth } from "@/components/auth-provider";
+import { Quiz, Assignment, AddCircle, AssignmentAdd, Description, Share, Edit } from "@mui/icons-material";
 
 interface UserStats {
   templatesCount: number;
@@ -18,9 +19,9 @@ interface SurveyTemplate {
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   
-  // Mock user ID - in a real app this would come from auth context
-  const userId = 1;
+  const userId = user?.id || 1;
 
   const { data: stats } = useQuery<UserStats>({
     queryKey: [`/api/user/${userId}/stats`],
@@ -49,10 +50,10 @@ export default function Dashboard() {
       <div className="bg-gradient-to-r from-green-800 to-green-600 rounded-lg p-6 text-white material-card">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-medium mb-2">Welcome back, Sarah</h2>
+            <h2 className="text-xl font-medium mb-2">Welcome back, {user?.name || 'User'}</h2>
             <p className="text-green-100 text-sm">Ready to capture carbon footprints?</p>
           </div>
-          <Leaf className="text-3xl opacity-80" />
+          <div className="text-3xl opacity-80">🌱</div>
         </div>
       </div>
 

@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   name: text("name").notNull(),
   email: text("email"),
+  phone: text("phone"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -101,3 +102,26 @@ export type InsertSurveyTemplate = z.infer<typeof insertSurveyTemplateSchema>;
 
 export type Survey = typeof surveys.$inferSelect;
 export type InsertSurvey = z.infer<typeof insertSurveySchema>;
+
+// Auth schemas
+export const loginSchema = z.object({
+  identifier: z.string().min(1, "Email or phone is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export const signupSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Valid email is required").optional(),
+  phone: z.string().optional(),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password confirmation is required"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+}).refine((data) => data.email || data.phone, {
+  message: "Either email or phone is required",
+  path: ["email"],
+});
+
+export type LoginData = z.infer<typeof loginSchema>;
+export type SignupData = z.infer<typeof signupSchema>;

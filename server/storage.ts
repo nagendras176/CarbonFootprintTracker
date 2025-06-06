@@ -6,6 +6,8 @@ export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
   // Survey template operations
@@ -38,6 +40,16 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.phone, phone));
+    return user || undefined;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
@@ -49,10 +61,7 @@ export class DatabaseStorage implements IStorage {
   async createSurveyTemplate(template: InsertSurveyTemplate): Promise<SurveyTemplate> {
     const [newTemplate] = await db
       .insert(surveyTemplates)
-      .values({
-        ...template,
-        updatedAt: new Date(),
-      })
+      .values(template as any)
       .returning();
     return newTemplate;
   }
@@ -60,6 +69,10 @@ export class DatabaseStorage implements IStorage {
   async getSurveyTemplate(id: number): Promise<SurveyTemplate | undefined> {
     const [template] = await db.select().from(surveyTemplates).where(eq(surveyTemplates.id, id));
     return template || undefined;
+  }
+
+  async getAllSurveyTemplates(): Promise<SurveyTemplate[]> {
+    return await db.select().from(surveyTemplates);
   }
 
   async getSurveyTemplateByCode(code: string): Promise<SurveyTemplate | undefined> {
@@ -78,10 +91,7 @@ export class DatabaseStorage implements IStorage {
   async updateSurveyTemplate(id: number, updates: Partial<InsertSurveyTemplate>): Promise<SurveyTemplate | undefined> {
     const [updated] = await db
       .update(surveyTemplates)
-      .set({
-        ...updates,
-        updatedAt: new Date(),
-      })
+      .set(updates as any)
       .where(eq(surveyTemplates.id, id))
       .returning();
     return updated || undefined;
@@ -89,13 +99,13 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSurveyTemplate(id: number): Promise<boolean> {
     const result = await db.delete(surveyTemplates).where(eq(surveyTemplates.id, id));
-    return result.rowCount > 0;
+    return result.rowCount as number > 0;
   }
 
   async createSurvey(survey: InsertSurvey): Promise<Survey> {
     const [newSurvey] = await db
       .insert(surveys)
-      .values(survey)
+      .values(survey as any)
       .returning();
     return newSurvey;
   }
@@ -109,7 +119,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(surveys)
-      .where(eq(surveys.conductedBy, userId))
+      .where(eq(surveys, userId))
       .orderBy(desc(surveys.createdAt));
   }
 
@@ -123,7 +133,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSurvey(id: number): Promise<boolean> {
     const result = await db.delete(surveys).where(eq(surveys.id, id));
-    return result.rowCount > 0;
+    return result.rowCount  as number> 0;
   }
 
   async getUserStats(userId: number): Promise<{ templatesCount: number; surveysCount: number }> {
