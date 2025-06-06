@@ -67,49 +67,6 @@ export async function generatePDF(data: PDFData) {
   
   yPosition += 15;
   
-  // Survey Responses
-  pdf.setFontSize(14);
-  pdf.setFont("helvetica", "bold");
-  yPosition = addText("Survey Responses", 20, yPosition);
-  
-  yPosition += 5;
-  
-  // Table header
-  pdf.setFontSize(10);
-  pdf.setFont("helvetica", "bold");
-  pdf.text("Question", 20, yPosition);
-  pdf.text("Value", 120, yPosition);
-  pdf.text("CO₂ (kg)", 160, yPosition);
-  yPosition += 7;
-  
-  // Draw line under header
-  pdf.line(20, yPosition - 2, pageWidth - 20, yPosition - 2);
-  yPosition += 5;
-  
-  // Survey responses
-  pdf.setFont("helvetica", "normal");
-  const questions = data.template.questions as any[];
-  
-  data.responses.forEach((response) => {
-    const question = questions.find(q => q.id === response.questionId);
-    if (question) {
-      // Check if we need a new page
-      if (yPosition > pageHeight - 30) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-      
-      const questionText = pdf.splitTextToSize(question.text, 90);
-      pdf.text(questionText, 20, yPosition);
-      pdf.text(`${response.value} ${question.unit}`, 120, yPosition);
-      pdf.text(response.carbonEquivalent.toFixed(2), 160, yPosition);
-      
-      yPosition += Math.max(questionText.length * 5, 10);
-    }
-  });
-  
-  yPosition += 15;
-  
   // Total Carbon Footprint
   pdf.setFontSize(16);
   pdf.setFont("helvetica", "bold");
@@ -140,11 +97,6 @@ export async function generatePDF(data: PDFData) {
   yPosition += 5;
   
   const recommendations = [
-    "• Consider switching to renewable energy sources",
-    "• Improve home insulation to reduce energy consumption", 
-    "• Use energy-efficient appliances",
-    "• Reduce unnecessary travel and consider public transportation",
-    "• Plant trees or support reforestation projects",
     "• Purchase carbon credits from verified projects"
   ];
   

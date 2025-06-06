@@ -10,6 +10,8 @@ import { useAuth } from "@/components/auth-provider";
 import { loginSchema, type LoginData } from "@shared/schema";
 import { z } from "zod";
 import { LockOutlined, PersonOutline } from "@mui/icons-material";
+import { getApiUrl } from "@/utils/url";
+
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -23,7 +25,7 @@ export default function Login() {
 
   const { mutate: login, isPending } = useMutation({
     mutationFn: async (data: LoginData) => {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(getApiUrl("/api/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

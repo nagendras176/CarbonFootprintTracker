@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Save, Info } from "@mui/icons-material";
 import type { SurveyQuestion, SurveyTemplate } from "@shared/schema";
+import { getApiUrl } from "@/utils/url";
 
 interface TemplateForm {
   name: string;
@@ -38,7 +39,7 @@ export default function SurveyDesign() {
 
   const createTemplateMutation = useMutation({
     mutationFn: async (templateData: TemplateForm) => {
-      const response = await apiRequest("POST", "/api/survey-templates", {
+      const response = await apiRequest("POST", getApiUrl("/api/survey-templates"), {
         ...templateData,
         createdBy: userId,
       });

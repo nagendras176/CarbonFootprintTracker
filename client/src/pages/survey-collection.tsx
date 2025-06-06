@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { generatePDF } from "@/lib/pdf-generator";
 import { Search, QrCodeScanner, Description, Save, Nature, List } from "@mui/icons-material";
 import type { SurveyTemplate, SurveyResponse } from "@shared/schema";
+import { getApiUrl } from "@/utils/url";
 
 interface HouseholdInfo {
   id: string;
@@ -62,7 +63,7 @@ export default function SurveyCollection() {
   const loadTemplateMutation = useMutation({
     mutationFn: async (code: string) => {
       setIsLoadingTemplate(true);
-      const response = await apiRequest("GET", `/api/survey-templates/code/${code}`);
+      const response = await apiRequest("GET", getApiUrl(`/api/survey-templates/code/${code}`));
       return response.json();
     },
     onSuccess: (template: SurveyTemplate) => {
@@ -88,7 +89,7 @@ export default function SurveyCollection() {
   const loadSurveyMutation = useMutation({
     mutationFn: async (surveyId: number) => {
       setIsLoadingTemplate(true);
-      const response = await apiRequest("GET", `/api/surveys/${surveyId}`);
+      const response = await apiRequest("GET", getApiUrl(`/api/surveys/${surveyId}`));
       return response.json();
     },
     onSuccess: (survey: any) => {
@@ -124,7 +125,7 @@ export default function SurveyCollection() {
     mutationFn: async () => {
       if (!currentTemplate) throw new Error("No template selected");
       
-      const response = await apiRequest("POST", "/api/surveys", {
+      const response = await apiRequest("POST", getApiUrl("/api/surveys"), {
         templateId: currentTemplate.id,
         householdId: householdInfo.id,
         householdAddress: householdInfo.address,

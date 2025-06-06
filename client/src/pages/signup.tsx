@@ -10,6 +10,7 @@ import { useAuth } from "@/components/auth-provider";
 import { signupSchema, type SignupData } from "@shared/schema";
 import { z } from "zod";
 import { PersonAddOutlined, PersonOutline, EmailOutlined, PhoneOutlined, LockOutlined } from "@mui/icons-material";
+import { getApiUrl } from "@/utils/url";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -26,7 +27,7 @@ export default function Signup() {
 
   const { mutate: signup, isPending } = useMutation({
     mutationFn: async (data: SignupData) => {
-      const response = await fetch("/api/auth/signup", {
+      const response = await fetch(getApiUrl("/api/auth/signup"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

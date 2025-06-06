@@ -13,6 +13,9 @@ import Reports from "@/pages/reports";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import NotFound from "@/pages/not-found";
+import { environment } from "@/environment";
+
+console.log(environment);
 
 function Router() {
   return (
