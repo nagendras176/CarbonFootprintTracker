@@ -119,7 +119,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(surveys)
-      .where(eq(surveys, userId))
+      .where(eq(surveys.conductedBy, userId))
       .orderBy(desc(surveys.createdAt));
   }
 
