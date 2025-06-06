@@ -1,0 +1,222 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --primary: 122 39% 32%; /* #2E7D32 - Material Green 800 */
+  --primary-foreground: 0 0% 98%;
+  --secondary: 122 47% 55%; /* #66BB6A - Material Green 400 */
+  --secondary-foreground: 0 0% 9%;
+  --accent: 122 39% 59%; /* #81C784 - Material Green 300 */
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 122 39% 32%;
+  --radius: 0.5rem;
+  --green-50: 104 50% 94%; /* #F1F8E9 */
+  --green-100: 104 44% 87%; /* #DCEDC8 */
+  --green-500: 122 39% 49%; /* #4CAF50 */
+  --green-600: 122 40% 44%; /* #43A047 */
+  --green-700: 122 39% 39%; /* #388E3C */
+  --green-800: 122 39% 32%; /* #2E7D32 */
+  --green-900: 122 61% 23%; /* #1B5E20 */
+}
+
+.dark {
+  --background: 0 0% 9%;
+  --foreground: 0 0% 98%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 65%;
+  --popover: 0 0% 9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 0 0% 9%;
+  --card-foreground: 0 0% 98%;
+  --border: 0 0% 15%;
+  --input: 0 0% 15%;
+  --primary: 122 39% 32%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 0 0% 15%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 0 0% 84%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-roboto antialiased bg-background text-foreground;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .font-roboto {
+    font-family: 'Roboto', sans-serif;
+  }
+
+  .shadow-material {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.24);
+  }
+
+  .shadow-material-lg {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.24);
+  }
+
+  .ripple-effect {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+
+  .ripple-effect:active {
+    transform: scale(0.98);
+  }
+
+  .material-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .material-card:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  }
+
+  .slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .green-50 {
+    background-color: hsl(var(--green-50));
+  }
+
+  .green-100 {
+    background-color: hsl(var(--green-100));
+  }
+
+  .green-500 {
+    background-color: hsl(var(--green-500));
+  }
+
+  .green-600 {
+    background-color: hsl(var(--green-600));
+  }
+
+  .green-700 {
+    background-color: hsl(var(--green-700));
+  }
+
+  .green-800 {
+    background-color: hsl(var(--green-800));
+  }
+
+  .green-900 {
+    background-color: hsl(var(--green-900));
+  }
+
+  .text-green-50 {
+    color: hsl(var(--green-50));
+  }
+
+  .text-green-100 {
+    color: hsl(var(--green-100));
+  }
+
+  .text-green-500 {
+    color: hsl(var(--green-500));
+  }
+
+  .text-green-600 {
+    color: hsl(var(--green-600));
+  }
+
+  .text-green-700 {
+    color: hsl(var(--green-700));
+  }
+
+  .text-green-800 {
+    color: hsl(var(--green-800));
+  }
+
+  .text-green-900 {
+    color: hsl(var(--green-900));
+  }
+
+  .border-green-200 {
+    border-color: hsl(var(--green-100));
+  }
+
+  .bg-green-50 {
+    background-color: hsl(var(--green-50));
+  }
+
+  .bg-green-100 {
+    background-color: hsl(var(--green-100));
+  }
+
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+}
