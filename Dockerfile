@@ -13,5 +13,5 @@ RUN rm -f .env
 
 RUN npm run build || (rm -rf node_modules package-lock.json && npm install && npm run build)
 
-EXPOSE 5000
+EXPOSE 9000
 CMD ["npm", "start"]

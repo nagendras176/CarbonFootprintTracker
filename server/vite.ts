@@ -23,7 +23,7 @@ export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
-    allowedHosts: ['localhost', '127.0.0.1', '0.0.0.0', '103.186.121.57'],
+    allowedHosts: ['localhost', '127.0.0.1', '0.0.0.0', '103.186.121.57', '192.168.0.108'],
   };
 
   const vite = await createViteServer({
@@ -38,6 +38,11 @@ export async function setupVite(app: Express, server: Server) {
     },
     server: serverOptions,
     appType: "custom",
+  });
+
+  app.use("*", (req, res, next) => {
+    console.log("Request received:", req.originalUrl);
+    next();
   });
 
   app.use(vite.middlewares);

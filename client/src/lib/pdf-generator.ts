@@ -97,7 +97,14 @@ export async function generatePDF(data: PDFData) {
   yPosition += 5;
   
   const recommendations = [
-    "• Purchase carbon credits from verified projects"
+    "• Plant trees in your local community - one tree can absorb about 22kg of CO2 per year",
+    "• Purchase carbon credits from verified environmental projects",
+    "• Install solar panels to reduce reliance on fossil fuel energy",
+    "• Start a home composting system to reduce methane emissions",
+    "• Switch to energy-efficient LED lighting throughout your home",
+    "• Use public transportation or carpool when possible",
+    "• Create a home garden to reduce food transportation emissions",
+    "• Improve home insulation to reduce heating/cooling energy usage"
   ];
   
   recommendations.forEach(rec => {
