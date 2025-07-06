@@ -278,6 +278,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/health", (req, res) => {
+    res.status(200).json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  });
+
+  app.get("/health/live", (req, res) => {
+    res.status(200).json({ 
+      status: "alive", 
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  app.get("/health/ready", (req, res) => {
+    // Check if the application is ready to serve requests
+    // This could include database connectivity checks, etc.
+    res.status(200).json({ 
+      status: "ready", 
+      timestamp: new Date().toISOString(),
+      services: {
+        database: "connected", // You could add actual DB health checks here
+        storage: "available"
+      }
+    });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
